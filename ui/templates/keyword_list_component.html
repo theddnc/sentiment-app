@@ -1,0 +1,9 @@
+<div class="col-lg-3 col-md-3 col-sm-5">
+    <h4>Lista słów kluczowych</h4>
+    <ol>
+        {% for keyword in keywords %}
+            <li><a href="/ui/keywords/{{ keyword.key }}">{{ keyword.key }}</a></li>
+        {% endfor %}
+    </ol>
+    {% include 'keyword_add_component.html' %}
+</div>

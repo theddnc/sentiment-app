@@ -1,0 +1,8 @@
+<div class="col-lg-9 col-md-9 col-sm-7">
+    <h1 style="color: rgba(50,180,220,1)">{{ keyword.key }}</h1>
+    <p><strong>Liczba pomiarow</strong>: {{ sentiments.count }}</p>
+    <p><strong>Średnia wartość sentymentu</strong>: {{ sentiments.avg }}</p>
+    <p><strong>Ostatni tweet</strong>: {{ last_tweet.text }}</p>
+
+    <canvas id="sentiment-chart" width="600" height="300"></canvas>
+</div>
