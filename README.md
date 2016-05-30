@@ -70,4 +70,16 @@ Co powinno dodać słowo kluczowe "kopytko" oraz powiązaną z nim wartość sen
 
 ## A gdzie tu agenci?
 
-Szczerze mówiąc, to jeszcze nie wiem. Ogarnie się. 
+Szczerze mówiąc, to jeszcze nie wiem. Ogarnie się.
+
+EDIT:
+Już są!
+Żeby odpalić naszego małego bonda ściągamy:
+https://pypi.python.org/pypi/SPADE
+rozpakowujemy, przechodzimy do katalogu i odapalamy:
+
+```python configure.py 0.0.0.0
+./runspade.py
+```
+
+potem wystarczy uruchomić twitter_crawler.py i cieszyć się świeżutkimi tweetami
