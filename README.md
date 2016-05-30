@@ -78,8 +78,8 @@ Już są!
 https://pypi.python.org/pypi/SPADE
 rozpakowujemy, przechodzimy do katalogu i odapalamy:
 
-```python configure.py 0.0.0.0
-./runspade.py
-```
+```python configure.py 0.0.0.0```
+```./runspade.py```
+
 
 potem wystarczy uruchomić twitter_crawler.py i cieszyć się świeżutkimi tweetami
