@@ -6,5 +6,5 @@ con_secret_key='HE1UdlphpvGVk6Xy32PxIScHlPFYUROnvMUg3fIIrmuowllkTQ'
 
 #Twitter crawler config
 batch_size=2
-keywords = ['python', 'javascript', 'ruby']
+keywords = ['ruby']
 tweet_ontology = "tweets"
