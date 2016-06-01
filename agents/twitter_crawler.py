@@ -2,6 +2,7 @@
 from Queue import Queue
 
 import spade
+from agents.supervisor import SupervisorAgent
 from agents.utils import config
 from agents.utils.tweet import TwitterStreamListener
 from tweepy import OAuthHandler
@@ -20,10 +21,11 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
     def restart_stream(self):
         print "Restarting stream"
         self.stream.disconnect()
-        self.stream.filter(self.keywords, async=True)
+        self.stream.filter(track=self.keywords, async=True)
 
     def update_stream(self, keywords):
-        print "Stream update: " + keywords
+        print "Updating stream with keywords: "
+        print keywords
         if len(keywords) != 0:
             for word in keywords:
                 if word not in self.keywords:
@@ -45,7 +47,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         # self.send(self.msg)
 
     def get_tweets_from_queue(self):
-        print "Preparing message content"
+        print "Preparing tweet package content"
         tweets_list = []
         while len(tweets_list) < config.batch_size and not self.q.empty():
             item = self.q.get()
@@ -56,10 +58,10 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         return tweets_list
 
     def _setup(self):
-        print "Agent is starting"
+        print "Tweeter crawler is starting"
+        self.setDebugToScreen()
         self.init_stream()
-        b = ListenForTweetsBehav(10)
-        self.addBehaviour(b, None)
+        self.addBehaviour(ListenForTweetsBehav(10), None)
 
         template = spade.Behaviour.ACLTemplate()
         template.setOntology(config.tweet_ontology)
@@ -69,22 +71,22 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
 
 class ListenForTweetsBehav(spade.Behaviour.PeriodicBehaviour):
     def onStart(self):
-        print "Initialized periodic behaviour"
+        pass
 
     def _onTick(self):
-        print "tick"
-        if not self.myAgent.stream.running and not self.myAgent.keywords.empty:
+        print "crawler tick"
+        if not self.myAgent.stream.running and len(self.myAgent.keywords) != 0:
             print "Stream dead, restarting"
             self.myAgent.restart_stream()
         if not self.myAgent.q.empty():
-            self.myAgent.prep_and_send_message()
+            self.myAgent.prepare_and_send_message()
         else:
             print "Empty tweet queue"
 
 
 class UpdateKeywordsBehav(spade.Behaviour.EventBehaviour):
     def _process(self):
-        print "Updating keywords!"
+        print "Received keyword message!"
         self.msg = self._receive(False)
         if self.msg:
             keyword_list = self.msg.getContent().split(',')
@@ -94,39 +96,8 @@ class UpdateKeywordsBehav(spade.Behaviour.EventBehaviour):
                 print "invalid message"
 
 
-class SupervisorAgent(spade.Agent.Agent):
-    def _setup(self):
-        print "SUPERWIZOR OPERATING"
-        b = WakeUp(10)
-        self.addBehaviour(b, None)
-
-
-class WakeUp(spade.Behaviour.PeriodicBehaviour):
-    def onStart(self):
-        self.counter = 0
-
-    def _onTick(self):
-        print "super tick"
-        keywords = ''
-        if self.counter == 1:
-            keywords = "dupa"
-        if self.counter >= 2:
-            keywords = "sex"
-        print "Preparing message"
-        print keywords
-        receiver = spade.AID.aid(name="agent@0.0.0.0",
-                                 addresses=["xmpp://agent@0.0.0.0"])
-        self.msg = spade.ACLMessage.ACLMessage()
-        self.msg.setPerformative("inform")
-        self.msg.setOntology(config.tweet_ontology)
-        self.msg.addReceiver(receiver)
-        self.msg.setContent(keywords)
-        self.myAgent.send(self.msg)
-        self.counter += 1
-
-
 if __name__ == "__main__":
-    a = TwitterCrawlerAgent("agent@0.0.0.0", "secret")
+    # a = TwitterCrawlerAgent("agent@0.0.0.0", "secret")
     b = SupervisorAgent("agent1@0.0.0.0", "secret")
-    a.start()
+    # a.start()
     b.start()
