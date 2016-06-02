@@ -1,5 +1,8 @@
 # coding=utf-8
+import os
 from Queue import Queue
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import spade
 from agents.supervisor import SupervisorAgent
@@ -7,7 +10,6 @@ from agents.utils import config
 from agents.utils.tweet import TwitterStreamListener
 from tweepy import OAuthHandler
 from tweepy.streaming import Stream
-
 
 class TwitterCrawlerAgent(spade.Agent.Agent):
     def init_stream(self):
