@@ -2,14 +2,15 @@
 import os
 from Queue import Queue
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 import spade
 from agents.supervisor import SupervisorAgent
 from agents.utils import config
 from agents.utils.tweet import TwitterStreamListener
 from tweepy import OAuthHandler
 from tweepy.streaming import Stream
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 
 class TwitterCrawlerAgent(spade.Agent.Agent):
     def init_stream(self):
@@ -29,9 +30,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         print "Updating stream with keywords: "
         print keywords
         if len(keywords) != 0:
-            for word in keywords:
-                if word not in self.keywords:
-                    self.keywords.append(word)
+            self.keywords = keywords
             self.listener.set_keywords(self.keywords)
             self.restart_stream()
         else:
@@ -99,7 +98,7 @@ class UpdateKeywordsBehav(spade.Behaviour.EventBehaviour):
 
 
 if __name__ == "__main__":
-    # a = TwitterCrawlerAgent("agent@0.0.0.0", "secret")
+    a = TwitterCrawlerAgent("agent@0.0.0.0", "secret")
     b = SupervisorAgent("agent1@0.0.0.0", "secret")
-    # a.start()
+    a.start()
     b.start()

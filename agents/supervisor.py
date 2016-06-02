@@ -1,49 +1,62 @@
+import sqlite3 as lite
+
 import spade
 from agents.utils import config
-import sqlite3 as lite
-import sys
 
 
 class SupervisorAgent(spade.Agent.Agent):
     def _setup(self):
+        self.setDebugToScreen()
+        self.keywords = []
         print "SUPERWIZOR OPERATING"
-        behav = WakeUp(10)
-        self.addBehaviour(behav, None)
+        self.addBehaviour(WakeUp(10), None)
 
+    def init_database(self):
+        self.connection = lite.connect('../sentiment_app/db.sqlite3')
 
-class WakeUp(spade.Behaviour.PeriodicBehaviour):
-    def onStart(self):
+    def disconnect_database(self):
+        self.connection.close()
 
-        con = None
-        try:
-            con = lite.connect('../sentiment_app/db.sqlite3')
-            cur = con.cursor()
-            cur.execute('SELECT * from api_keyword')
+    def get_cursor(self):
+        return self.connection.cursor()
 
-            data = cur.fetchone()
-            print data
-        except lite.Error, e:
-            print "Error %s:" % e.args[0]
-            sys.exit(1)
-        finally:
-            if con:
-                con.close()
+    def are_keywords_updated(self):
+        self.init_database()
+        print "getting keywords"
+        cur = self.get_cursor()
+        cur.execute('SELECT * FROM api_keyword')
+        new_keywords = []
+        for record in cur.fetchall():
+            new_keywords.append(str(record[1]))
+        self.disconnect_database()
+        print new_keywords
+        if set(new_keywords) != set(self.keywords):
+            self.keywords = new_keywords
+            return True
+        return False
 
-    def _onTick(self):
-        print "super tick"
-        keywords = ''
-        if self.counter == 1:
-            keywords = "dupa"
-        if self.counter >= 2:
-            keywords = "sex"
-        print "Preparing message"
-        print keywords
+    def send_keywords(self):
+        print "sending keywords"
         receiver = spade.AID.aid(name="agent@0.0.0.0",
                                  addresses=["xmpp://agent@0.0.0.0"])
         self.msg = spade.ACLMessage.ACLMessage()
         self.msg.setPerformative("inform")
         self.msg.setOntology(config.tweet_ontology)
         self.msg.addReceiver(receiver)
-        self.msg.setContent(keywords)
-        self.myAgent.send(self.msg)
-        self.counter += 1
+        content = ''
+        for word in self.keywords:
+            content += word + ','
+        content = content[:-1]
+        self.msg.setContent(content)
+        self.send(self.msg)
+
+
+class WakeUp(spade.Behaviour.PeriodicBehaviour):
+    def onStart(self):
+        print "starting behav"
+
+    def _onTick(self):
+        print "TICK"
+        if self.myAgent.are_keywords_updated():
+            self.myAgent.send_keywords()
+
