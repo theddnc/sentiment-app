@@ -45,40 +45,35 @@ class SentimentCounter(object):
             q='"poor" '+phrase,
             cx='000797812240645302824:8o6spe9gkxa',
         ).execute()['searchInformation']['totalResults']
-        phrase_near_poor = int(phrase_near_poor)
+        phrase_near_poor = float(phrase_near_poor)
 
         phrase_near_excellent = self.service.cse().list(
             q='"excellent" '+phrase,
             exactTerms=phrase,
             cx='000797812240645302824:8o6spe9gkxa',
         ).execute()['searchInformation']['totalResults']
-        phrase_near_excellent = int(phrase_near_excellent)
+        phrase_near_excellent = float(phrase_near_excellent)
 
         excellent = self.service.cse().list(
             q='"excellent"',
             exactTerms=phrase,
             cx='000797812240645302824:8o6spe9gkxa',
         ).execute()['searchInformation']['totalResults']
-        excellent = int(excellent)
+        excellent = float(excellent)
 
         poor = self.service.cse().list(
             q='"poor"',
             exactTerms=phrase,
             cx='000797812240645302824:8o6spe9gkxa',
         ).execute()['searchInformation']['totalResults']
-        poor = int(poor)
-
-        print phrase_near_poor
-        print phrase_near_excellent
-        print poor
-        print excellent
+        poor = float(poor)
         return math.log((phrase_near_excellent * poor)/(phrase_near_poor * excellent), 2)
 
     def count_sentiment(self, text):
         tokenized_sentences = self.split_paragraph_into_words(text)
         tagged_sentences = self.pos_tag(tokenized_sentences)
         phrases = [self.split_into_two_words_phrases(sentence) for sentence in tagged_sentences][0]
-        sentiment = 0
+        sentiment = 0.0
         for phrase in phrases:
             query = phrase[0][0]+' ' + phrase[1][0]
             sentiment += self.count_sentiment_for_phrase(query)
