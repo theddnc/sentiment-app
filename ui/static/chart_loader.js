@@ -22,8 +22,8 @@ function createChart(apiResult, canvasElement) {
     var options = {
         scaleOverride : true,
         scaleSteps : 10,
-        scaleStepWidth : 20,
-        scaleStartValue : -100,
+        scaleStepWidth : 2,
+        scaleStartValue : -10,
         animation: true
     };
     var ctx = canvasElement.getContext('2d');
