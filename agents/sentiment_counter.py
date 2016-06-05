@@ -1,9 +1,10 @@
 import nltk
-from googleapiclient.discovery import build
 import math
 import urllib2
 import json
 import pprint
+
+BING_SEARCH_URL = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27{0}%27&$top=1&$format=JSON'
 
 class SentimentCounter(object):
     def __init__(self):
@@ -31,43 +32,27 @@ class SentimentCounter(object):
     def count_sentiment_for_phrase(self, phrase):
         keyBing = 'AXxEt0tlz+z8DRMf8PIW7vH5llUGdSHqv20KF5YwplA'  # get Bing key from: https://datamarket.azure.com/account/keys
         credentialBing = 'Basic ' + (':%s' % keyBing).encode('base64')[:-1]  # the "-1" is to remove the trailing "\n" which encode adds
-        query = '%22'+phrase+'%22%22poor%22'
-        url = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27' + query + '%27&$top=1&$format=JSON'
-        request = urllib2.Request(url)
+        
+        value_set = {
+            phrase_near_poor: { query: '%22'+phrase+'%22%22poor%22' }, 
+            phrase_near_excellent: { query: '%22' + phrase + '%22%22excellent%22' }, 
+            excellet: { query: '%22excellent%22' }, 
+            poor: { query: '%22poor%22' }, 
+        }
+        
+        value_set = {k: count_results_from_bing(v) for k, v in value_set.items()}
+
+        return math.log((value_set.phrase_near_excellent.value * value_set.poor.value)/(value_set.phrase_near_poor.value * value_set.excellent.value), 2)
+        
+    def count_results_from_bing(item):
+        query = item.query
+        request = urllib2.Request(BING_SEARCH_URL.format(query)
         request.add_header('Authorization', credentialBing)
         requestOpener = urllib2.build_opener()
         response = requestOpener.open(request)
         results = json.load(response)
-        phrase_near_poor =  float(results['d']['results'][0]['WebTotal'])
-
-        query = '%22' + phrase + '%22%22excellent%22'
-        url = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27' + query + '%27&$top=1&$format=JSON'
-        request = urllib2.Request(url)
-        request.add_header('Authorization', credentialBing)
-        requestOpener = urllib2.build_opener()
-        response = requestOpener.open(request)
-        results = json.load(response)
-        phrase_near_excellent = float(results['d']['results'][0]['WebTotal'])
-
-        query = '%22excellent%22'
-        url = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27' + query + '%27&$top=1&$format=JSON'
-        request = urllib2.Request(url)
-        request.add_header('Authorization', credentialBing)
-        requestOpener = urllib2.build_opener()
-        response = requestOpener.open(request)
-        results = json.load(response)
-        excellent = float(results['d']['results'][0]['WebTotal'])
-
-        query = '%22poor%22'
-        url = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27' + query + '%27&$top=1&$format=JSON'
-        request = urllib2.Request(url)
-        request.add_header('Authorization', credentialBing)
-        requestOpener = urllib2.build_opener()
-        response = requestOpener.open(request)
-        results = json.load(response)
-        poor = float(results['d']['results'][0]['WebTotal'])
-
-        return math.log((phrase_near_excellent * poor)/(phrase_near_poor * excellent), 2)
+        item.value = float(results['d']['results'][0]['WebTotal'])
+        return item
 
     def count_sentiment(self, text):
         tokenized_sentences = self.split_paragraph_into_words(text)
@@ -80,8 +65,3 @@ class SentimentCounter(object):
             print query
             sentiment += self.count_sentiment_for_phrase(query)
         return sentiment
-
-# text = """good job
-# # """
-# s = SentimentCounter()
-# print s.count_sentiment(text)
