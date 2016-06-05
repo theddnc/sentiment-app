@@ -2,7 +2,6 @@ import nltk
 import math
 import urllib2
 import json
-import pprint
 
 BING_SEARCH_URL = 'https://api.datamarket.azure.com/Bing/Search/Composite?Sources=%27web%27&Query=%27{0}%27&$top=1&$format=JSON'
 

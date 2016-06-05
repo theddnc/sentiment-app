@@ -3,6 +3,7 @@ import os
 from Queue import Queue
 import sys
 import spade
+from agents.sentimenter import SentimentCounterAgent
 from agents.supervisor import SupervisorAgent
 from agents.utils import config
 from agents.utils.tweet import TwitterStreamListener
@@ -24,7 +25,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
     def restart_stream(self):
         print "Restarting stream"
         self.stream.disconnect()
-        self.stream.filter(track=self.keywords, async=True)
+        self.stream.filter(track=self.keywords, async=True, languages=["en"])
 
     def update_stream(self, keywords):
         print "Updating stream with keywords: "
@@ -38,14 +39,19 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
 
     def prepare_and_send_message(self):
         print "Preparing message"
-        receiver = spade.AID.aid(name="agent@0.0.0.0",
-                                 addresses=["xmpp://agent@0.0.0.0"])
+        receiver = spade.AID.aid(name=config.sentimenter,
+                                 addresses=["xmpp://" + config.sentimenter])
         self.msg = spade.ACLMessage.ACLMessage()
         self.msg.setPerformative("inform")
-        self.msg.setOntology(config.tweet_ontology)
+        self.msg.setOntology(config.raw_tweet)
         self.msg.addReceiver(receiver)
-        self.msg.setContent(self.get_tweets_from_queue())
-        # self.send(self.msg)
+        content = self.get_tweets_from_queue()
+        str_content = ""
+        for tweet in content:
+            str_content += str(tweet).encode("utf-8") + "|"
+        str_content = str_content[:-1]
+        self.msg.setContent(str_content)
+        self.send(self.msg)
 
     def get_tweets_from_queue(self):
         print "Preparing tweet package content"
@@ -55,7 +61,6 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
             if item is None:
                 break
             tweets_list.append(item)
-            print item
         return tweets_list
 
     def _setup(self):
@@ -65,7 +70,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         self.addBehaviour(ListenForTweetsBehav(10), None)
 
         template = spade.Behaviour.ACLTemplate()
-        template.setOntology(config.tweet_ontology)
+        template.setOntology(config.keyword_msg)
         t = spade.Behaviour.MessageTemplate(template)
         self.addBehaviour(UpdateKeywordsBehav(), t)
 
@@ -98,7 +103,9 @@ class UpdateKeywordsBehav(spade.Behaviour.EventBehaviour):
 
 
 if __name__ == "__main__":
-    a = TwitterCrawlerAgent("agent@0.0.0.0", "secret")
-    b = SupervisorAgent("agent1@0.0.0.0", "secret")
+    a = TwitterCrawlerAgent(config.crawler, "secret")
+    b = SupervisorAgent(config.master, "secret")
+    c = SentimentCounterAgent(config.sentimenter, "secret")
     a.start()
     b.start()
+    c.start()

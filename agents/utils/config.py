@@ -7,4 +7,13 @@ con_secret_key='HE1UdlphpvGVk6Xy32PxIScHlPFYUROnvMUg3fIIrmuowllkTQ'
 #Twitter crawler config
 batch_size=2
 keywords = ['ruby']
-tweet_ontology = "tweets"
+
+#message ontologies
+keyword_msg = "keywords"
+raw_tweet = "tweet"
+tweet_with_sentiment = "sentiment"
+
+#agent addresses
+master = "agent@0.0.0.0"
+crawler = "agent1@0.0.0.0"
+sentimenter = "agent2@0.0.0.0"
