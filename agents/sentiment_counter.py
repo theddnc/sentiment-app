@@ -80,7 +80,7 @@ class SentimentCounter(object):
         try:
             log = math.log((phrase_near_excellent * self.poor) / (phrase_near_poor * self.excellent), 2)
         except ZeroDivisionError:
-            print("Division by zero!")
+            # print("Division by zero!")
             return 0
         return log
 
@@ -90,10 +90,10 @@ class SentimentCounter(object):
         tagged_sentences = self.pos_tag(tokenized_sentences)
         phrases = [self.split_into_two_words_phrases(sentence) for sentence in tagged_sentences][0]
         sentiment = 0.0
-        print phrases
+        # print phrases
         for phrase in phrases:
             query = phrase[0][0] + '+' + phrase[1][0]
-            print query
+            # print query
             sentiment += self.count_sentiment_for_phrase(query)
         return sentiment
 

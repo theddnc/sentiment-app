@@ -1,4 +1,5 @@
 import sqlite3 as lite
+from Queue import Queue
 from datetime import datetime
 import spade
 from utils import config
@@ -48,12 +49,25 @@ class SupervisorAgent(spade.Agent.Agent):
         self.send(self.msg)
 
     def receive_tweets(self, raw_tweet_list):
-        self.tweet_list = []
         for tweet in raw_tweet_list:
             tweet_obj = Tweet.deserialize(tweet)
-            self.tweet_list.append(tweet_obj)
+            self.q.put(tweet_obj)
+
+    def get_tweets_from_queue(self):
+        self.log("Getting tweets from queue")
+        tweets_list = []
+        while len(tweets_list) < config.batch_size and not self.q.empty():
+            item = self.q.get()
+            if item is None:
+                break
+            tweets_list.append(item)
+        return tweets_list
 
     def insert_data(self):
+        self.tweet_list = self.get_tweets_from_queue()
+        if len(self.tweet_list) == 0:
+            self.log("No tweets to insert")
+            return
         self.log("inserting tweets")
         self.init_database()
         cur = self.get_cursor()
@@ -71,8 +85,9 @@ class SupervisorAgent(spade.Agent.Agent):
 
     def _setup(self):
         # self.setDebugToScreen()
+        self.q = Queue()
         self.keywords = []
-        self.addBehaviour(WakeUp(10), None)
+        self.addBehaviour(Process(10), None)
 
         template = spade.Behaviour.ACLTemplate()
         template.setOntology(config.tweet_with_sentiment)
@@ -80,13 +95,14 @@ class SupervisorAgent(spade.Agent.Agent):
         self.addBehaviour(ReceiveTweetsBehav(), t)
 
 
-class WakeUp(spade.Behaviour.PeriodicBehaviour):
+class Process(spade.Behaviour.PeriodicBehaviour):
     def onStart(self):
         pass
 
     def _onTick(self):
         if self.myAgent.are_keywords_updated():
             self.myAgent.send_keywords()
+        self.myAgent.insert_data()
 
 
 class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
@@ -97,6 +113,5 @@ class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
             tweet_list = self.msg.getContent().split('|')
             if len(tweet_list) != 0 and len(self.msg.getContent()) != 0:
                 self.myAgent.receive_tweets(tweet_list)
-                self.myAgent.insert_data()
             else:
                 self.myAgent.log("invalid message")

@@ -55,6 +55,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         str_content = str_content[:-1]
         self.msg.setContent(str_content)
         self.send(self.msg)
+        self.log("Message sent")
 
     def get_tweets_from_queue(self):
         self.log("Preparing tweet package content")
