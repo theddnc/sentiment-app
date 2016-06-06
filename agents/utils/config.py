@@ -6,7 +6,6 @@ con_secret_key='HE1UdlphpvGVk6Xy32PxIScHlPFYUROnvMUg3fIIrmuowllkTQ'
 
 #Twitter crawler config
 batch_size=2
-keywords = ['ruby']
 
 #message ontologies
 keyword_msg = "keywords"

@@ -1,7 +1,7 @@
 import spade
-from agents.sentiment_counter import SentimentCounter
-from agents.utils import config
-from agents.utils.tweet import Tweet
+from sentiment_counter import SentimentCounter
+from utils import config
+from utils.tweet import Tweet
 
 
 class SentimentCounterAgent(spade.Agent.Agent):
@@ -18,8 +18,8 @@ class SentimentCounterAgent(spade.Agent.Agent):
             return
         for tweet in self.tweet_list:
             #TODO udroznic licznik sentymentu
-            #counted_sentiment = self.sentiment_counter.count_sentiment(tweet.text)
-            counted_sentiment = 1.0
+            counted_sentiment = self.sentiment_counter.count_sentiment(tweet.text)
+            #counted_sentiment = 1.0
             self.tweet_sentiment_list.append(tweet._replace(sentiment=counted_sentiment))
 
     def send_tweet_with_sentiment(self):

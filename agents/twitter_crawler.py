@@ -3,10 +3,10 @@ import os
 from Queue import Queue
 import sys
 import spade
-from agents.sentimenter import SentimentCounterAgent
-from agents.supervisor import SupervisorAgent
-from agents.utils import config
-from agents.utils.tweet import TwitterStreamListener
+from sentimenter import SentimentCounterAgent
+from supervisor import SupervisorAgent
+from utils import config
+from utils.tweet import TwitterStreamListener
 from tweepy import OAuthHandler
 from tweepy.streaming import Stream
 

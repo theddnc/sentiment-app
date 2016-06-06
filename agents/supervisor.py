@@ -1,8 +1,8 @@
 import sqlite3 as lite
 
 import spade
-from agents.utils import config
-from agents.utils.tweet import Tweet
+from utils import config
+from utils.tweet import Tweet
 
 
 class SupervisorAgent(spade.Agent.Agent):
@@ -56,6 +56,8 @@ class SupervisorAgent(spade.Agent.Agent):
         self.init_database()
         cur = self.get_cursor()
         for tweet in self.tweet_list:
+            if float(tweet.sentiment) == 0:
+                continue
             cur.execute("INSERT INTO api_keywordtweet (text) VALUES (?)", (tweet.text,))
 
             tweet_id = cur.lastrowid
