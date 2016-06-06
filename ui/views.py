@@ -2,6 +2,7 @@ from django.db.models import Avg, Count
 from django.shortcuts import render
 
 from api.models import Keyword, KeywordSentiment, KeywordTweet
+from api.serializers import KeywordSerializer
 from forms import KeywordAdd
 
 
@@ -31,7 +32,7 @@ def keyword_detail(request, key):
     keyword = Keyword.objects.get(key=key)
     keywords = Keyword.objects.all()
     form = KeywordAdd()
-    return render(request, 'keyword_detail.html', {
+    parameters = {
         'keyword': keyword,
         'keywords': keywords,
         'sentiments': KeywordSentiment.objects.filter(keyword=keyword)
@@ -51,7 +52,9 @@ def keyword_detail(request, key):
             }
         ],
         'form': form
-    })
+    }
+    parameters['sentiments']['list'] = KeywordSerializer(keyword).data['sentiments']
+    return render(request, 'keyword_detail.html', parameters)
 
 
 def add_keyword_from_form(form):

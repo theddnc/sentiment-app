@@ -5,4 +5,26 @@
     <p><strong>Ostatni tweet</strong>: {{ last_tweet.text }}</p>
 
     <canvas id="sentiment-chart" width="600" height="300"></canvas>
+
+    <div>
+        <table class="table-striped table-hover">
+        <thead>
+        <tr>
+            <th>Data</th>
+            <th>Wartość sentymentu</th>
+            <th>Tweet</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sentiment in sentiments.list %}
+            <tr>
+                <td style="padding: 10px" class="col-md-2">{{ sentiment.created_date }}</td>
+                <td style="padding: 10px" class="col-md-2">{{ sentiment.value }}</td>
+                <td style="padding: 10px" class="col-md-8">{{ sentiment.tweet.text }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
 </div>
