@@ -1,6 +1,7 @@
-<form>
+<form action="/ui/keywords/" method="post">
     <fieldset>
-        <input type="text" id="new-keyword">
-        <button id="add">Dodaj</button>
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Dodaj" id=add" />
     </fieldset>
 </form>
