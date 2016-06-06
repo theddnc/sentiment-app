@@ -5,7 +5,8 @@ con_secret='hx8pZvRQR224EckbS4yB2H0gy'
 con_secret_key='HE1UdlphpvGVk6Xy32PxIScHlPFYUROnvMUg3fIIrmuowllkTQ'
 
 #Twitter crawler config
-batch_size=2
+batch_size=10
+
 
 #message ontologies
 keyword_msg = "keywords"

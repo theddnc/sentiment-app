@@ -48,7 +48,7 @@ class TwitterCrawlerAgent(spade.Agent.Agent):
         content = self.get_tweets_from_queue()
         str_content = ""
         for tweet in content:
-            str_content += str(tweet).encode("utf-8") + "|"
+            str_content += tweet.serialize() + "|"
         str_content = str_content[:-1]
         self.msg.setContent(str_content)
         self.send(self.msg)

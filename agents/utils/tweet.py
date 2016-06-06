@@ -1,18 +1,26 @@
 # coding=utf-8
-from collections import namedtuple
-import time
+import pickle
 
 import re
 from tweepy import StreamListener
 from tweepy.streaming import json
 
 
-class Tweet(namedtuple('Tweet', ['id', 'tag', 'text', 'create_date', 'sentiment'])):
-    __slots__ = ()
+class Tweet():
+    def __init__(self, id, key, text, created_date, sentiment):
+        self.id = id
+        self.key = key
+        self.text = text
+        self.created_date = created_date
+        self.sentiment = sentiment
 
-    def __str__(self):
-        return str(str(self.id) + "::" + str(self.tag) + "::" + str(self.text) + "::" + str(
-            self.create_date) + "::" + str(self.sentiment))
+    def serialize(self):
+        return pickle.dumps(self)
+
+    @staticmethod
+    def deserialize(tweet_str):
+        return pickle.loads(tweet_str)
+
 
 class TwitterStreamListener(StreamListener):
     def __init__(self, _keywords, queue, api=None):
@@ -25,9 +33,7 @@ class TwitterStreamListener(StreamListener):
         for key in self.keywords:
             if re.search(key, tweet['text'], re.IGNORECASE):
                 twit = Tweet(tweet['id'], key, tweet['text'].encode('ascii', 'ignore'), tweet['timestamp_ms'], 0)
-                twit_dict = {'id': tweet['id'], 'tag': key, 'text': tweet['text'], 'create_date': tweet['timestamp_ms'],
-                             'sentiment': 0}
-                self.queue.put(twit_dict)
+                self.queue.put(twit)
         return True
 
     def set_keywords(self, keywords):

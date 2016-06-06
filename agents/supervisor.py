@@ -47,9 +47,8 @@ class SupervisorAgent(spade.Agent.Agent):
     def receive_tweets(self, raw_tweet_list):
         self.tweet_list = []
         for tweet in raw_tweet_list:
-            tweet_split = tweet.split('::')
-            tweet_tuple = Tweet(tweet_split[0], tweet_split[1], tweet_split[2], tweet_split[3], tweet_split[4])
-            self.tweet_list.append(tweet_tuple)
+            tweet_obj = Tweet.deserialize(tweet)
+            self.tweet_list.append(tweet_obj)
 
     def insert_data(self):
         print "inserting tweets"
@@ -61,10 +60,10 @@ class SupervisorAgent(spade.Agent.Agent):
             cur.execute("INSERT INTO api_keywordtweet (text) VALUES (?)", (tweet.text,))
 
             tweet_id = cur.lastrowid
-            cur.execute("SELECT id FROM api_keyword WHERE key = ?", (tweet.tag,))
+            cur.execute("SELECT id FROM api_keyword WHERE key = ?", (tweet.key,))
             key_id = cur.fetchone()[0]
             cur.execute("INSERT INTO api_keywordsentiment (keyword_id, tweet_id, value, created_date) VALUES (?,?,?,?)",
-                        (key_id, tweet_id, tweet.sentiment, datetime.fromtimestamp(int(tweet.create_date) / 1000.0)))
+                        (key_id, tweet_id, tweet.sentiment, datetime.fromtimestamp(int(tweet.created_date) / 1000.0)))
         self.disconnect_database()
 
     def _setup(self):
