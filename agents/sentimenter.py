@@ -5,6 +5,9 @@ from utils.tweet import Tweet
 
 
 class SentimentCounterAgent(spade.Agent.Agent):
+    def log(self, msg):
+        print '[SENTIMENT_COUNTER] '+msg
+
     def receive_tweets(self, raw_tweet_list):
         self.tweet_list = []
         for tweet in raw_tweet_list:
@@ -15,11 +18,14 @@ class SentimentCounterAgent(spade.Agent.Agent):
         if len(self.tweet_list) == 0:
             return
         for tweet in self.tweet_list:
-            counted_sentiment = self.sentiment_counter.count_sentiment(tweet.text)
+            try:
+                counted_sentiment = self.sentiment_counter.count_sentiment(tweet.text)
+            except:
+                counted_sentiment = 0
             tweet.sentiment = counted_sentiment
 
     def send_tweet_with_sentiment(self):
-        print "Preparing message"
+        self.log("Preparing message")
         receiver = spade.AID.aid(name=config.master,
                                  addresses=["xmpp://" + config.master])
         self.msg = spade.ACLMessage.ACLMessage()
@@ -36,7 +42,7 @@ class SentimentCounterAgent(spade.Agent.Agent):
 
     def _setup(self):
         self.sentiment_counter = SentimentCounter()
-        self.setDebugToScreen()
+        # self.setDebugToScreen()
         template = spade.Behaviour.ACLTemplate()
         template.setOntology(config.raw_tweet)
         t = spade.Behaviour.MessageTemplate(template)
@@ -45,7 +51,7 @@ class SentimentCounterAgent(spade.Agent.Agent):
 
 class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
     def _process(self):
-        print "Received tweets message!"
+        self.myAgent.log("Received tweets message!")
         self.msg = self._receive(False)
         if self.msg:
             tweet_list = self.msg.getContent().split('|')
@@ -54,4 +60,4 @@ class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
                 self.myAgent.count_sentiment()
                 self.myAgent.send_tweet_with_sentiment()
             else:
-                print "invalid message"
+                self.myAgent.log("invalid message")

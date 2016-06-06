@@ -6,6 +6,9 @@ from utils.tweet import Tweet
 
 
 class SupervisorAgent(spade.Agent.Agent):
+    def log(self, msg):
+        print '[SUPERVISOR] '+msg
+
     def init_database(self):
         self.connection = lite.connect('../sentiment_app/db.sqlite3', timeout=10, check_same_thread=False)
 
@@ -30,7 +33,7 @@ class SupervisorAgent(spade.Agent.Agent):
         return False
 
     def send_keywords(self):
-        print "sending keywords"
+        self.log("sending keywords")
         receiver = spade.AID.aid(name=config.crawler,
                                  addresses=["xmpp://" + config.crawler])
         self.msg = spade.ACLMessage.ACLMessage()
@@ -51,7 +54,7 @@ class SupervisorAgent(spade.Agent.Agent):
             self.tweet_list.append(tweet_obj)
 
     def insert_data(self):
-        print "inserting tweets"
+        self.log("inserting tweets")
         self.init_database()
         cur = self.get_cursor()
         for tweet in self.tweet_list:
@@ -67,7 +70,7 @@ class SupervisorAgent(spade.Agent.Agent):
         self.disconnect_database()
 
     def _setup(self):
-        self.setDebugToScreen()
+        # self.setDebugToScreen()
         self.keywords = []
         self.addBehaviour(WakeUp(10), None)
 
@@ -88,7 +91,7 @@ class WakeUp(spade.Behaviour.PeriodicBehaviour):
 
 class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
     def _process(self):
-        print "Received tweets with sentiment message!"
+        self.myAgent.log("Received tweets with sentiment message!")
         self.msg = self._receive(False)
         if self.msg:
             tweet_list = self.msg.getContent().split('|')
@@ -96,4 +99,4 @@ class ReceiveTweetsBehav(spade.Behaviour.EventBehaviour):
                 self.myAgent.receive_tweets(tweet_list)
                 self.myAgent.insert_data()
             else:
-                print "invalid message"
+                self.myAgent.log("invalid message")
