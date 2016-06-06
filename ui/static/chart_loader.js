@@ -24,10 +24,20 @@ function createChart(apiResult, canvasElement) {
         scaleSteps : 10,
         scaleStepWidth : 2,
         scaleStartValue : -10,
-        animation: true
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem, data) {
+                    return data.datasets[0].tweets[tooltipItem.index].split(' ').slice(0, 10).join(' ') + '...';
+                }
+            }
+        }
     };
     var ctx = canvasElement.getContext('2d');
-    var sentimentChart = new Chart(ctx).Line(data, options);
+    var sentimentChart = new Chart(ctx, {
+        data: data,
+        options: options,
+        type: 'line'
+    });
 }
 
 function createDataset(data) {
@@ -36,17 +46,17 @@ function createDataset(data) {
         data: _.map(data.sentiments, function(element) {
             return element.value;
         }),
-        fillColor: "rgba(50,180,220,0.2)",
-        strokeColor: "rgba(50,180,220,1)",
-        pointColor: "rgba(50,180,220,1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(50,180,220,1)"
+        tweets: _.map(data.sentiments, function(element) {
+            return element.tweet.text;
+        }),
+        backgroundColor: "rgba(50,180,220,0.2)",
+        borderColor: "rgba(50,180,220,1)"
     }
 }
 
 function createLabels(data) {
-    return _.map(data.sentiments, function(element) {
-        return new Date(element.created_date).toDateString();
+    return _.map(data.sentiments, function(element, idx) {
+        var date = new Date(element.created_date);
+        return date.toDateString() + ' ' + date.toTimeString().split(' ')[0];
     });
 }
