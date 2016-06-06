@@ -1,6 +1,6 @@
 # coding=utf-8
 from collections import namedtuple
-from datetime import datetime
+import time
 
 import re
 from tweepy import StreamListener
@@ -14,7 +14,6 @@ class Tweet(namedtuple('Tweet', ['id', 'tag', 'text', 'create_date', 'sentiment'
         return str(str(self.id) + "::" + str(self.tag) + "::" + str(self.text) + "::" + str(
             self.create_date) + "::" + str(self.sentiment))
 
-
 class TwitterStreamListener(StreamListener):
     def __init__(self, _keywords, queue, api=None):
         super(TwitterStreamListener, self).__init__(api)
@@ -25,9 +24,10 @@ class TwitterStreamListener(StreamListener):
         tweet = json.loads(data)
         for key in self.keywords:
             if re.search(key, tweet['text'], re.IGNORECASE):
-                date = str(datetime.now().strftime("%Y-%m-%d"))
-                twit = Tweet(tweet['id'], key, tweet['text'].encode('ascii', 'ignore'), date, 0)
-                self.queue.put(twit)
+                twit = Tweet(tweet['id'], key, tweet['text'].encode('ascii', 'ignore'), tweet['timestamp_ms'], 0)
+                twit_dict = {'id': tweet['id'], 'tag': key, 'text': tweet['text'], 'create_date': tweet['timestamp_ms'],
+                             'sentiment': 0}
+                self.queue.put(twit_dict)
         return True
 
     def set_keywords(self, keywords):

@@ -1,5 +1,5 @@
 import sqlite3 as lite
-
+from datetime import datetime
 import spade
 from utils import config
 from utils.tweet import Tweet
@@ -64,7 +64,7 @@ class SupervisorAgent(spade.Agent.Agent):
             cur.execute("SELECT id FROM api_keyword WHERE key = ?", (tweet.tag,))
             key_id = cur.fetchone()[0]
             cur.execute("INSERT INTO api_keywordsentiment (keyword_id, tweet_id, value, created_date) VALUES (?,?,?,?)",
-                        (key_id, tweet_id, tweet.sentiment, tweet.create_date))
+                        (key_id, tweet_id, tweet.sentiment, datetime.fromtimestamp(int(tweet.create_date) / 1000.0)))
         self.disconnect_database()
 
     def _setup(self):
