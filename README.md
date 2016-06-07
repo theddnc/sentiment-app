@@ -79,11 +79,11 @@ configure.py 0.0.0.0
 runspade.py
 ```
 
-Po przejściu do katalogu agents (z aktywnym virtualenvem) uruchamiamy jeszcze komendę:
+Po przejściu do katalogu agents (z aktywnym virtualenvem) uruchamiamy pythona i wpisujemy:
 
 ```python 
 import nltk
-python nltk.download()
+nltk.download()
 ```
 
 i z menu na ekranie wybieramy pakiet 'books'.
