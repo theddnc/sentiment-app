@@ -68,18 +68,24 @@ sentiment.save()
 
 Co powinno dodać słowo kluczowe "kopytko" oraz powiązaną z nim wartość sentymentu.
 
-## A gdzie tu agenci?
+## Agenci
 
-Szczerze mówiąc, to jeszcze nie wiem. Ogarnie się.
-
-EDIT:
-Już są!
-Żeby odpalić naszego małego bonda ściągamy:
+Żeby uruchomić agentów, najpierw ściągamy:
 https://pypi.python.org/pypi/SPADE
 rozpakowujemy, przechodzimy do katalogu i odapalamy:
 
-```python configure.py 0.0.0.0```
-```runspade.py```
+```python 
+configure.py 0.0.0.0
+runspade.py
+```
 
+Po przejściu do katalogu agents (z aktywnym virtualenvem) uruchamiamy jeszcze komendę:
 
-potem wystarczy uruchomić twitter_crawler.py i cieszyć się świeżutkimi tweetami
+```python 
+import nltk
+python nltk.download()
+```
+
+i z menu na ekranie wybieramy pakiet 'books'.
+
+Na koniec wystarczy uruchomić twitter_crawler.py z katalogu agents i cieszyć się świeżutkimi tweetami
